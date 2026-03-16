@@ -1,0 +1,287 @@
+# Powerlifting Strength Analytics Pipeline
+
+## Overview
+
+This project builds a **data analytics pipeline for powerlifting performance** using Python, PostgreSQL, and SQL. The goal is to analyze strength trends in powerlifting by weight class and sex, focusing on elite-level lifters by selecting the **top 100 performances per category**.
+
+The pipeline ingests raw powerlifting meet data, transforms and filters it, and produces analytical summaries such as:
+
+- Maximum lifts per weight class
+- Average elite-level performance
+- Age distribution of top lifters
+- Oldest and youngest lifters in elite groups
+
+The project demonstrates an end-to-end workflow combining **ETL, database design, data transformation, and SQL analytics**.
+
+---
+
+# Project Architecture
+
+```
+Raw Dataset
+     │
+     ▼
+Python ETL Notebook
+(powerlifting_raw_data_ETL.ipynb)
+     │
+     ▼
+PostgreSQL Database
+     │
+     ▼
+raw_powerlifting table
+     │
+     ├── Python filtering (top performances)
+     │
+     ▼
+top_100_benches
+top_100_squats
+     │
+     ▼
+SQL analytics queries
+     │
+     ▼
+Strength statistics by weight class and sex
+```
+
+---
+
+# Technologies Used
+
+- **Python**
+- **Pandas**
+- **PostgreSQL**
+- **SQL (window functions, aggregations)**
+- **SQLAlchemy**
+- **Jupyter Notebook**
+
+---
+
+# Database Schema
+
+## Raw Data Table
+
+`raw_powerlifting`
+
+Stores the cleaned dataset of powerlifting meet results.
+
+Columns:
+
+- `date`
+- `name`
+- `sex`
+- `event`
+- `equipment`
+- `age`
+- `bodyweightlbs`
+- `squatlbs`
+- `benchlbs`
+- `deadliftlbs`
+- `totallbs`
+- `place`
+- `weightclasslbs`
+
+---
+
+## Processed Tables
+
+### `top_100_benches`
+
+Top 100 bench press performances per **weight class and sex**.
+
+Columns:
+
+- `name`
+- `age`
+- `sex`
+- `date`
+- `bodyweightlbs`
+- `weightclasslbs`
+- `benchlbs`
+
+---
+
+### `top_100_squats`
+
+Top 100 squat performances per **weight class and sex**.
+
+Columns:
+
+- `name`
+- `age`
+- `sex`
+- `date`
+- `bodyweightlbs`
+- `weightclasslbs`
+- `squatlbs`
+
+---
+
+# ETL Process
+
+The ETL pipeline is implemented in:
+
+```
+powerlifting_raw_data_ETL.ipynb
+```
+
+Steps:
+
+1. Import raw powerlifting dataset
+2. Clean and standardize columns
+3. Convert dates and numeric fields
+4. Load data into PostgreSQL table `raw_powerlifting`
+
+---
+
+# Performance Filtering
+
+Two notebooks generate elite performance datasets:
+
+### Bench
+
+```
+top_100_benches.ipynb
+```
+
+Process:
+
+1. Sort bench press results by weight
+2. Keep the best lift per lifter per weight class
+3. Select the **top 100 lifters per weight class and sex**
+4. Insert results into the `top_100_benches` table
+
+---
+
+### Squat
+
+```
+top_100_squats.ipynb
+```
+
+Follows the same process for squat performance.
+
+---
+
+# Analytical Queries
+
+The project includes several SQL queries to analyze elite-level strength.
+
+## Strength Statistics
+
+Example output metrics per weight class and sex:
+
+- Maximum lift
+- Average lift
+- Oldest lifter
+- Average age
+- Youngest lifter
+
+Example metrics produced:
+
+| weight class | sex | max squat | avg squat | oldest | avg age | youngest |
+| ------------ | --- | --------- | --------- | ------ | ------- | -------- |
+
+---
+
+## Oldest Elite Lifters
+
+Window functions identify the **oldest lifter performing elite lifts**.
+
+Logic:
+
+```
+ROW_NUMBER() OVER (
+PARTITION BY weightclasslbs, sex
+ORDER BY age DESC, lift DESC
+)
+```
+
+This returns the highest lift performed by the **oldest athlete in each category**.
+
+---
+
+# Key Analytical Questions
+
+This project explores:
+
+- What is the **maximum strength level** per weight class?
+- What is the **average performance among elite lifters**?
+- How does **age vary among top lifters**?
+- Which weight classes show the **greatest longevity**?
+
+---
+
+# Example Insights
+
+The dataset can reveal patterns such as:
+
+- Heavier weight classes generally show **higher absolute strength**
+- Elite lifters cluster around **late 20s to early 30s**
+- Some weight classes maintain strong performance **into the 40s and beyond**
+
+---
+
+# How to Run the Project
+
+### 1. Install dependencies
+
+```
+pip install pandas sqlalchemy psycopg2 jupyter
+```
+
+---
+
+### 2. Start PostgreSQL
+
+Create a database:
+
+```
+raw_powerlifting
+```
+
+---
+
+### 3. Run ETL notebook
+
+```
+powerlifting_raw_data_ETL.ipynb
+```
+
+This loads the dataset into the `raw_powerlifting` table.
+
+---
+
+### 4. Run filtering notebooks
+
+```
+top_100_benches.ipynb
+top_100_squats.ipynb
+```
+
+These create the top-100 performance tables.
+
+---
+
+### 5. Execute SQL queries
+
+Run the included SQL scripts to generate analytical summaries.
+
+---
+
+# Future Improvements
+
+Potential expansions of the project:
+
+- Add **deadlift analytics**
+- Create a **top 100 totals table**
+- Analyze **peak strength age curves**
+- Build **visualizations (Matplotlib / PowerBI / Tableau)**
+- Create a **dashboard for strength analytics**
+
+---
+
+# Author
+
+Nick B.
+
+Data Analytics / Strength Sports Research
